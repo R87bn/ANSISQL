@@ -304,4 +304,123 @@ select distinct OFICIO from EMP;
 --SELECIONAMOS LOS EMPLEADOS ORDENADOS POR SALARIO DE FORMA DESCENDENTE Y SU PUESTO Y APELLIDO
 select OFICIO, salario, apellido from EMP order by salario desc;
 
+                --PRACTICA 1
+
+    --1. Mostrar todos los enfermos nacidos antes del 11/01/1970.
+    select * from ENFERMO where FECHA_NAC <= '11/01/1970';
+select * from ENFERMO where FECHA_NAC <= '11/01/1970' order by FECHA_NAC;
+select APELLIDO, FECHA_NAC FROM ENFERMO WHERE FECHA_NAC <= '11/01/1970' order by FECHA_NAC;
+
+    --2. Igual que el anterior, para los nacidos antes del 1/1/1970 ordenados por número de inscripción.
+    select * from ENFERMO where FECHA_NAC <= '1/1/1970' order by INSCRIPCION;
+
+    --3. Listar todos los datos de la plantilla del hospital del turno de mañana
+select * from PLANTILLA where turno='M';
+    --4. Idem del turno de noche.
+    
+select * from PLANTILLA where turno='N';
+
+    --5. Listar los doctores que su salario anual supere 3.000.000 €.
+select * from DOCTOR;
+select APELLIDO, SALARIO from  DOCTOR where SALARIO > 250000;
+select * from DOCTOR where(salario*12)>3000000;
+select APELLIDO, SALARIO,(SALARIO*12) as SALARIO_ANUAL FROM DOCTOR where (salario*12)>3000000;
+
+    --6. Visualizar los empleados de la plantilla del turno de mañana que tengan un salario entre 200.000 y 2.250.000.
+    select APELLIDO, SALARIO from PLANTILLA where TURNO='M' and SALARIO between 200000 and 2250000;
+   -- select APELLIDO, SALARIO,(SALARIO*12) as SALARIO_ANUAL FROM DOCTOR where (salario*12)>3000000;
+    --select APELLIDO, SALARIO,(SALARIO*12) as SALARIO_ANUAL FROM DOCTOR where (salario*12)>3000000;
+    
+   -- 7. Visualizar los empleados de la tabla emp que no se dieron de alta entre el 01/01/1980 y el 12/12/1982.
+select * from EMP FECHA_ALT order by FECHA_ALT;
+select APELLIDO, FECHA_ALT from EMP where FECHA_ALT <= '01/01/1980' or FECHA_ALT >= '12/12/1982' order by FECHA_ALT;--Código Standart, válido para cualquier BBDD
+select APELLIDO, FECHA_ALT from EMP where FECHA_ALT not between '01/01/1980' and '12/12/1982' order by FECHA_ALT;
+
+    --8. Mostrar los nombres de los departamentos situados en Madrid o en Barcelona.*/
+select * from dept;
+select * from dept where loc in ('MADRID', 'BARCELONA');
+select DNOMBRE, LOC from DEPT WHERE LOC= 'MADRID' or LOC='BARCELONA';
+select DNOMBRE, LOC from DEPT WHERE LOC IN ('MADRID', 'BARCELONA');
+
+
+
+--CONSTULTAS DE AGRUPACIÓN: NOS PERMITEN MOSTRAR ALGÚN RESUMEN SOBRE UN GRUPO DETERMINADO DE LOS DATOS
+--UTILIZAN FUNCIONES DE AGRUPACIÓN PARA CONSEGUIR EL RESUMEN
+--LAS FUNCIONES DEBEN TENER ALIAS
+--COUNT(*): Cuenta el número de registros, incluyendo nulos
+--COUNT(CAMPO): Cuenta el número de registros sin nulos
+--SUM(NUMERO): Suma el total de un campo número
+--AVG(NUMERO) Recupera la media de un campo numérico
+--MAX(CAMPO): Devuelve el valor máximo de un campo
+--MIN(CAMPO): Devuelve el valor mínimo de un campo
+
+--MOSTRAR EL NUM DE REGISTROS DE LA TABLA DOCTOR
+select count (*) from doctor;
+--incluimos alias
+select count(APELLIDO) as NUMERO_DOCTORES from DOCTOR;
+--COMBINAMOS FUNCIONES, QUEREMOS NUM DOCTORES Y MAX SALARIO
+select count(*) as DOCTORES, max (SALARIO) as MAXIMO from DOCTOR;
+--PODEMOS AGRUPAR LOS DATOS RESULTANTES POR ALGÚN CAMPO DE LA TABLA
+--CUANDO QUEREMOS AGRUPAR UTILIZAMOS group by DESPUES DEL from
+--TRUCO!!!!AGRUPAR POR CADA CAMPO QUE NO SEA UNA FUNCIÓN
+--MOSTRAR CUANTOS DOCTORES EXISTEN POR CADA ESPECIALIDAD
+select COUNT (*) as DOCTORES, ESPECIALIDAD
+from  DOCTOR
+group by ESPECIALIDAD;
+
+--MOSTRAR NUMERO DE PERSONAS Y MAX SALARIO DE LOS EMPLEADOS POR CADA DEPARTAMENTO Y OFICIO
+select count (*) as PERSONAS, max (SALARIO) as MAX_SALARIO,
+DEPT_NO, OFICIO
+from EMP
+group by DEPT_NO, OFICIO;
+
+
+--MOSTRAR Nº PERSONAS PLANTILLA
+select count (*) as NUM_PERSONAS from PLANTILLA;
+--MOSTRAR Nº PERSONAS POR TURNO
+select count (*) as PERSONAS, TURNO 
+from PLANTILLA
+group by TURNO;
+
+--FILTRANDO EN CONSULTAS DE AGRUPACIÓN, TENEMOS DOS POSIBILIDADES
+--1 WHERE: ANTES DEL GROUP BY Y PARA FILTRAR SOBRE LA TABLA
+--2 HAVING: DESPUES DEL GROUP BY PARA FILTRAR SOBRE EL CONJUNTO
+--MOSTRAR CUANTOS EMPLEADOS TENEMOS POR CADA OFICIO
+--QUE COBREN + 200.0000
+select count (*) as EMPLEADOS, OFICIO
+from EMP
+where SALARIO > 200000
+group by OFICIO;
+
+--FILTRANDO EN CONSULTAS DE AGRUPACIÓN, TENEMOS DOS POSIBILIDADES
+--1 WHERE: ANTES DEL GROUP BY Y PARA FILTRAR SOBRE LA TABLA
+--2 HAVING: DESPUES DEL GROUP BY PARA FILTRAR SOBRE EL CONJUNTO
+--MOSTRAR CUANTOS EMPLEADOS TENEMOS POR CADA OFICIO
+--QUE SEAN ANALISTAS O VENDEDORES
+select count (*) as EMPLEADOS, OFICIO
+from EMP
+group by OFICIO
+having OFICIO in ('ANALISTA', 'VENDEDOR');
+
+--PODEMOS DECIDIR HAVING O WHERE, CUÁL VA MÁS RÁPIDO?having cuando son MUUUCHOSS registros
+select count (*) as EMPLEADOS, OFICIO
+from EMP
+where OFICIO in ('ANALISTA', 'VENDEDOR')
+group by OFICIO;
+
+--MOSTRAR CUANTOS EMPLEADOS TENEMOS POR CADA OFICIO
+--QUE SEAN ANALISTAS O VENDEDORES
+--CUANDO NO PODEMOS DECIDIR Y ESTAMOS OBLIGADOS A UTILIZAR HAVING
+--SI QUEREMOS FILTRAR POR UNA FUNCIÓN DE AGRUPACIÓN
+--SOLAMENTE DONDE TENGAMOS DOS O MÁS EMPLEADOS DEL MISMO OFICIO
+
+--ANTE LA DUDA, HAVING--
+
+select count (*) as EMPLEADOS, OFICIO
+from EMP
+group by OFICIO
+having count(*) > 2;
+
+
+
 
